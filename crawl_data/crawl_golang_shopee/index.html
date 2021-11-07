@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script>
+			// QOS start time must be as early as possible.
+		var QOS_PAGE_START_MS = Date.now ? Date.now() : +new Date();
+		</script>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+		<meta name="google-site-verification" content="2XghfMSx40RY472Znf7Ban3wfzXhoXYuYXrD8qOz4F4" />
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0" />
+		<meta name='format-detection' content='telephone=no'>
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="white">
+		<meta name="apple-mobile-web-app-title" content="">
+		<link rel="apple-touch-icon" href="https://deo.shopeemobile.com/shopee/shopee-mall-live/images/logo-152x152.png">
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+		<meta name="robots" content="noindex">
+		<link href="/static/css/common_cdn.css?22dfa416e13f" rel="stylesheet">
+		<link href="/static/css/icons_cdn.css?2a75a323a132" rel="stylesheet">
+		<link href="/static/css/fonts_cdn.css?7d268f1e09b3" rel="stylesheet">
+		<link rel="stylesheet" href="/static/css/common/web_popup_cdn.css?ff9073462c34">
+		<link rel="stylesheet" href="/static/css/common/web_popup_box_cdn.css?0afada473953">
+		<title>Shopee</title>
+		<script type="text/javascript">
+			;(function() {
+		var SCRIPT_FAIL_THRESHOLD = 90000;
+		setTimeout(function() {
+		if (window.$ || window.jQuery) {
+		// console.log("jquery has been loaded successfully");
+		return true;
+		} else {
+		// jquery is not loaded after max timeout, we considered the script has fail to load
+		// it's time to show error message
+		// clear whatever dom content we have
+		document.body.innerHTML = document.getElementById("tap-to-reload").innerHTML;
+		document.body.addEventListener("touchend", function() {
+		window.location.reload(true); // reload from server, not cache
+		}, false);
+		// set alert message to vertical center
+		var alertMessageDom = document.getElementsByClassName("alert-message")[0];
+		var viewportHeight = document.documentElement.clientHeight;
+		alertMessageDom.style.marginTop
+		= Math.floor((viewportHeight - alertMessageDom.style.lineHeight)/2) + "px";
+		}
+		}, SCRIPT_FAIL_THRESHOLD);
+		})();
+		</script>
+		<script id="tap-to-reload" type="text/template">
+		<style>
+		body {
+		vertical-align : middle;
+		text-align : center;
+		}
+		.alert-message {
+		font-size : 18px;
+		vertical-align : middle;
+		display : inline-block;
+		}
+		</style>
+		<p class="alert-message">
+			Tap to reload again
+		</p>
+		</script>
+		<script type="text/javascript">
+			var ORIGIN_WHITE_LIST = ['www.facebook.com', 'facebook.com'];
+		function isSameOrigin() {
+			var selfHost = window.self.location.hostname;
+			var topHost = window.top.location.hostname;
+			if (topHost in ORIGIN_WHITE_LIST) {
+				return true;
+			}
+			// same domain, including 127.0.0.1, localhost etc
+			if (selfHost === topHost) {
+				return true;
+			}
+			// other domain not contain shopee keyword
+			if (topHost.indexOf('shopee') === -1) {
+				return false;
+			}
+			var topRootDomain = topHost.slice(topHost.indexOf('shopee'));
+			var selfRootDomain = selfHost.slice(selfHost.indexOf('shopee'));
+			return topRootDomain == selfRootDomain;
+		}
+		if (!isSameOrigin()) {
+			document.body.style.display = 'none';
+		} else { }
+		</script>
+		<script type="text/javascript">
+			{
+		function _getGlobals_()
+		{
+			var toRet = {};
+			try
+			{
+				for(var k in window)
+				{
+					if(window.hasOwnProperty(k))
+						toRet[k]= true;
+				}
+			}
+			catch(e){}
+			return toRet;
+		}
+		window._resetGlobals_ = function(resetTo)
+		{
+			var vars = resetTo;
+			for(var k in window)
+			{
+				if(window.hasOwnProperty(k) && vars[k] == null)
+				{
+					window[k] = null; //Note: delete doesn't work for window's fields.
+				}
+			}
+		};
+		if(navigator.userAgent.indexOf('Shopee') >= 0 && (navigator.userAgent.indexOf('iPhone') >= 0 || navigator.userAgent.indexOf('iPad') >= 0 || navigator.userAgent.indexOf('iPod') >= 0))
+		{
+			window.ORIGINAL_GLOBAL_VARS = _getGlobals_();
+		}
+		window.GTimeoutAndInterval = (function(){
+			var idsTimeout = {};
+			var idsInterval = {};
+			var funcSetTimeout = window.setTimeout;
+			var funcClearTimeout = window.clearTimeout;
+			var funcSetInterval = window.setInterval;
+			var funcClearInterval = window.clearInterval;
+			window.setTimeout = function(func, delay){
+				var id = funcSetTimeout(func, delay);
+				idsTimeout[id] = id;
+				return id;
+			};
+			window.clearTimeout = function(id){
+				funcClearTimeout(id);
+				delete idsTimeout[id];
+			};
+			window.setInterval = function(func, interval){
+				var id = funcSetInterval(func, interval);
+				idsInterval[id] = id;
+				return id;
+			};
+			window.clearInterval = function(id){
+				funcClearInterval(id);
+				delete idsInterval[id];
+			};
+			function clearAll(skipSelf)
+			{
+				for(var k in idsTimeout)
+					funcClearTimeout(k);
+				for(var k in idsInterval)
+					funcClearInterval(k);
+				idsTimeout = {};
+				idsInterval = {};
+				if(skipSelf) return;
+				window.setTimeout = funcSetTimeout;
+				window.setInterval = funcSetInterval;
+				window.clearTimeout = funcClearTimeout;
+				window.clearInterval = funcClearInterval;
+				funcSetTimeout = null;
+				funcClearTimeout = null;
+				funcClearInterval = null;
+				funcSetInterval = null;
+			}
+			return {
+				clearAll: clearAll,
+			};
+		})();
+		function hookEventTarget(target)
+		{
+			var p = target.prototype || target.__proto__;
+			if(!p) return;
+			p.addEventListenerBase = p.addEventListener;
+			p.addEventListener = function(type, listener)
+			{
+				if(!this.EventList) { this.EventList = {}; }
+				// This condition prevents the crash when jQueryMobile is re-evaluated after iOS cache invalidation. (Comment out this condition and force cache invalidation in iOS to see the crash in action.)
+				if(this.addEventListenerBase)
+					this.addEventListenerBase.apply(this, arguments);
+				if(!this.EventList[type]) { this.EventList[type] = []; }
+				var list = this.EventList[type];
+				for(var index = 0; index != list.length; index++)
+				{
+					if(list[index] === listener) { return; }
+				}
+				list.push(listener);
+			};
+			p.removeEventListenerBase = p.removeEventListener;
+			p.removeEventListener = function(type, listener)
+			{
+				if(!this.EventList) { this.EventList = {}; }
+				// This second condition prevents the crash when jQueryMobile is re-evaluated after iOS cache invalidation.
+				if((listener instanceof Function) && this.removeEventListenerBase)
+				{
+					this.removeEventListenerBase.apply(this, arguments);
+				}
+				if(!this.EventList[type]) { return; }
+				var list = this.EventList[type];
+				for(var index = 0; index != list.length;)
+				{
+					var item = list[index];
+					if(!listener)
+					{
+						this.removeEventListenerBase(type, item);
+						list.splice(index, 1); continue;
+					}
+					else if(item === listener)
+					{
+						list.splice(index, 1); break;
+					}
+					index++;
+				}
+				if(list.length == 0) { delete this.EventList[type]; }
+			};
+			p.removeAllEvents = function()
+			{
+				if(!this.EventList) return;
+				for(var type in this.EventList)
+				{
+					if(!this.EventList.hasOwnProperty(type)) continue;
+					var list = this.EventList[type];
+					if(!list) continue;
+					for(var j=0; j<list.length; j++)
+						{
+							this.removeEventListenerBase(type, list[j]);
+						}
+						delete this.EventList[type];
+					}
+				};
+			}
+			function unhookEventTarget(target)
+			{
+				var p = target.prototype || target.__proto__;
+				if(!p) return;
+				if(p.addEventListenerBase)
+					p.addEventListener = p.addEventListenerBase;
+				if(p.removeEventListenerBase)
+					p.removeEventListener = p.removeEventListenerBase;
+			}
+			try
+			{
+				// Note: Originally I wanted to do this with EventTarget.prototype...., but seems iOS doesn't expose EventTarget interface. So we have to do it one by one.
+				hookEventTarget(Window);
+				hookEventTarget(Document);
+				hookEventTarget(Element);
+			}
+			catch(e)
+			{
+				console.log('hookEventTarget.ex', e);
+			}
+			}
+			</script>
+			<script type="text/javascript">
+				var USERID = null;
+			var ALERT_LIKE_PRIVACY_MSG = false;
+			var CC_INSTALLMENT_PAYMENT_ELIGIBILITY = true;
+			var NON_CC_INSTALLMENT_PAYMENT_ELIGIBILITY = false;
+			var CURRENT_PATH = '/5s/6/6plus/6s/6splus/7/7plus/8/8plus/x/xr/xs/11/12/pro/max/plus/promax';
+			var CURRENT_SHOPID = 'None';
+			var VERSION = '';
+			var APPVER = '';
+			var LANGUAGE = 'vi';
+			var IS_FB_APP = false;
+			var T_EM_H = '';
+			</script>
+			<script type="text/javascript">
+				var LOCALE = 'VN';
+			var ENVIRONMENT = 'LIVE';
+			var POPTAB_FIRST = true;
+			var POPTAB_FIRST_HASHTAG = false;
+			var SHOW_TOP_SALES_TABS = true;
+			var ITEM_IMAGE_BASE_URL = 'https://cf.shopee.vn/file/';
+			var ITEM_VIDEO_BASE_URL = 'https://cv.shopee.vn/video/';
+			var ROOT_DOMAIN = 'shopee.vn';
+			var COOKIE_DOMAIN = 'shopee.vn';
+			
+			var msg_server_error = 'Lỗi Server';
+			var label_ok = 'ĐỒNG Ý';
+			var T_GA_ID = 'UA\u002D61914164\u002D6';
+			var T_GA_ID_PC = 'UA\u002D61914164\u002D6';
+			var T_FB_ID = '1457130904612161';
+			var T_CRITEO_ID = '34657';
+			var T_BI_SIG = "SPC_T_ID";
+			var T_BI_IV = "SPC_T_IV";
+			var SHOW_SHOPEE_VERIFIED_FILTER = true;
+			var SHOW_IN_PAGE_FILTER = true;
+			var MARKET_TRACKING_TOKEN_NAME = "smtt_v0";
+			var MARKET_TRACKING_TOKEN_V2_NAME = "smtt";
+			var MARKET_TRACKING_ADS_AFFILIATION_TOKEN = "sp_af";
+			var RN_BUNDLE_VERSION_COOKIE_NAME = "SPC_RNBV";
+			var PRICEZA_MERCHANT_ID = 7077;
+			var CONFIG_WALLET_KYC = false;
+			var AIRPAY_CLIENT_API_ENDPOINT = 'https://api\u002Dshopee.airpay.vn/wallet';
+			var CONFIG_COIN_INFLATION = 0.01;
+			var CONFIG_CONTACT_US_NUMBER = JSON.parse('{\u0022phone_number\u0022:\u002219001221\u0022,\u0022operating_hours\u0022:\u002224/7 tất cả các ngày trong tuần (Riêng ngày Lễ, Tết giờ làm việc từ 8h00 đến 17h00).\u0022,\u0022email_address\u0022:\u0022support@shopee.vn\u0022}')['phone_number'];
+			var IS_MALL_PAGE = true;
+			var STATIC_URL = '/static/';
+			var SIMPLE_VERSION = false;
+			var DEBUG = false;
+			var LOCALHOST = false;
+			var STAGING = false;
+			var ANDROID_FRIENDLY = false;
+			var ENABLE_RATING_REPLY = true;
+			var ADULT_AGE = '18';
+			var ENABLE_LOCATION_FILTER = true;
+			var ENABLE_LOCATION_FILTER_IN_PAGE = true;
+			var CONFIG_BRANDING_SHOPEE_WALLET_AS_MY_WALLET = false;
+			var CONFIG_ENABLE_AIRPAY_BUYER_WALLET = true;
+			var CONFIG_ENABLE_SHOPEE_BUYER_WALLET_V2 = false;
+			var SHOW_SOLD_COUNT = true;
+			var OPC_CART_MUST_HAVE_ADDRESS = true;
+			var CONFIG_FLASH_SALE_NAMED_AS_FLASH_DEAL = false;
+			var SHIPPING_OPTION_FILTER = true;
+			var ENABLE_SHIPPING_FILTER_PAGE = true;
+			var CONFIG_FLASH_SALE_NAME_KEY = "flash_sale";
+			var CONFIG_OFFICIAL_SHOP_ROOT_URL = "/mall";
+			var show_from_same_shop = true;
+			var CONFIG_SHOW_FROM_SAME_SHOP_SHOW_SECTION = true;
+			var ENABLE_OFFICIAL_SHOP_FILTER = true;
+			var ENABLE_OFFICIAL_SHOP_FILTER_IN_PAGE = true;
+			var ENABLE_CC_INSTALLMENT_PAYMENT = true;
+			var ENABLE_NON_CC_INSTALLMENT_PAYMENT = false;
+			var LOWEST_PRICE_GUARANTEE_SHOP = [{"userid":29940332,"shopid":29938948}];
+			var INSTALLMENT_FILTER = false;
+			var CONFIG_BRAND_LIST = true;
+			var CONFIG_RW_ONE_PAGE_CHECKOUT = true;
+			var CONFIG_ENABLE_LOCAL_WALLET = false;
+			var CONFIG_DIGIT_GROUP_SYMBOL = ".";
+			var CONFIG_FREE_SHIPPING_VOUCHER = true;
+			var TRACKING_URL_PARAMS = ["smtt","smtt_v0"];
+			var MARKET_UNIVERSAL_LANDING_PAGE_PREFIX = "/universal-link";
+			var CONFIG_ROUND_TO_DECIMAL_PLACE_FOR_BUYER_WALLET = 0;
+			var DS_GEO_DOMAIN = "https://geo.idata.shopee.com";
+			var VIEW_NAME = "mall.home.views.universal_landing_page";
+			var _gaq = [];
+			var _djangofy_t_ = {};
+			var _transify_t_ = {};
+			var i18njs = false;
+			window.criteo_q = window.criteo_q || [];
+			window.RN_PERCENTAGE = {"default":100,"just_for_you":0,"checkout":100};
+			window.RN_PAGE_MIN_VERSION_ANDROID = {"default":21416,"checkout":21200};
+			window.RN_PAGE_MIN_VERSION_IOS = {"default":21400,"checkout_cancel_provide_reason":24705,"checkout":21200};
+			window.RN_PAGE_MIN_VERSION_BUNDLE = {"default":0,"buy_again_improvement":4022000,"order_paid":2066000,"checkout_cancel_provide_reason":3033000,"new_change_payment_method_page":4010000,"rn_odp_page":4036000};
+			</script>
+			<script>
+				var gtmDataLayer = [{
+			'country': window.LOCALE.toLowerCase(),
+			'userid': window.USERID,
+			'source': 'mweb'
+			}];
+			</script>
+			<!-- Google Tag Manager -->
+			<script>
+				(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+			new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+			j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+			'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+			})(window,document,'script','gtmDataLayer','GTM-WJZQSJF');
+			</script>
+			<!-- End Google Tag Manager -->
+			<script type="text/javascript" src="/static/jsutil_min/tracking/fb_init.js?02a68e67c6ce" defer></script>
+			<script type="text/javascript" src="//static.criteo.net/js/ld/ld.js" async="true"></script>
+			<script type="text/javascript">
+				window.criteo_q.push({event: "setAccount", account: T_CRITEO_ID });
+				if(window.T_EM_H)
+					window.criteo_q.push({ event: "setEmail", email: window.T_EM_H });
+			</script>
+			<script type="text/javascript" src="/static/jslib_min/jslib_base.js?c44b766e9928"></script>
+			<script>
+				_transify_t_["label_mil_id"] = "JT";
+			_transify_t_["label_mil_ph"] = "mil";
+			_transify_t_["alert_set_default_ba_failed"] = "alert_set_default_ba_failed";
+			_transify_t_["label_ok"] = "ĐỒNG Ý";
+			_transify_t_["label_mil_th"] = "million";
+			_transify_t_["tooltips_shipping_fee_included"] = "Nếu bạn muốn thương lượng về Phí vận chuyển, vui lòng chat với Người bán và sử dụng tính năng \u0027Trả giá\u0027 để thương lượng.";
+			_transify_t_["label_used"] = "Đã sử dụng";
+			_transify_t_["label_used_good"] = "Đã dùng, tốt";
+			_transify_t_["label_years"] = "năm";
+			_transify_t_["label_apps"] = "Ứng dụng";
+			_transify_t_["text_download_shopee_for_more_function"] = "Tải ngay Shopee để sử dụng nhiều tính năng hơn.";
+			_transify_t_["alert_bank_account_wallet_pin_changed"] = "Tài khoản của bạn đang được xét duyệt. Vui lòng thử lại sau hoặc liên hệ {{hotline}} để được hỗ trợ.";
+			_transify_t_["label_short_for_number_100000000"] = "không khả dụng";
+			_transify_t_["label_copied_failed"] = "Sao chép không thành công";
+			_transify_t_["label_within_hours"] = "Trong vòng vài tiếng";
+			_transify_t_["label_short_for_number_10000"] = "not applicable";
+			_transify_t_["label_latest"] = "Mới nhất";
+			_transify_t_["alert_set_rejected_account_default"] = "Bạn không thể đặt tài khoản bị từ chối làm mặc định";
+			_transify_t_["label_new_without_tags"] = "Mới, không còn mác";
+			_transify_t_["label_price"] = "Giá";
+			_transify_t_["alert_bank_account_no_change"] = "Vui lòng cập nhật thông tin trước khi gửi.";
+			_transify_t_["label_cancel"] = "Không";
+			_transify_t_["label_year_abbr"] = "y";
+			_transify_t_["alert_bank_account_duplicate"] = "Bạn không thể tạo 2 tài khoản ngân hàng giống nhau";
+			_transify_t_["alert_bank_info_not_valid"] = "Thông tin ngân hàng của bạn chưa hợp lệ, vui lòng điền lại";
+			_transify_t_["label_week"] = "tuần";
+			_transify_t_["label_day"] = "ngày";
+			_transify_t_["tooltips_days_to_ship"] = "Số ngày mà Người bán cần để chuẩn bị sản phẩm trước khi giao đến cho bạn.";
+			_transify_t_["label_day_abbr"] = "ngày";
+			_transify_t_["label_not_set"] = "CHƯA THIẾT LẬP";
+			_transify_t_["tooltips_shipping_fee_included_my"] = "Nếu bạn muốn gửi hàng đến Đông Malaysia hoặc muốn thương lượng về Phí vận chuyển, vui lòng chat với Người bán.";
+			_transify_t_["msg_ios_coming_soon"] = "Sắp xuất hiện trên phiên bản iOS...";
+			_transify_t_["label_popular"] = "Phổ biến";
+			_transify_t_["alert_delete_default_account"] = "Bạn không thể xóa tài khoản ngân hàng mặc định";
+			_transify_t_["label_hour"] = "giờ";
+			_transify_t_["label_within_1_day"] = "within 1 day";
+			_transify_t_["label_prep_within"] = "Trong";
+			_transify_t_["alert_delete_pending_account"] = "Bạn không thể xóa tài khoản vì đang có đơn hàng/hoàn tiền trên tài khoản này";
+			_transify_t_["label_store_number"] = "Số cửa hàng";
+			_transify_t_["label_hours"] = "giờ";
+			_transify_t_["label_k_th"] = "พัน";
+			_transify_t_["label_copied_successfully"] = "copied successfully";
+			_transify_t_["alert_bank_account_banned"] = "Tài khoản ngân hàng đã bị khóa do có hoạt động bất thường. Vui lòng sử dung tài khoản ngân hàng khác hoặc liên hệ Bộ phận CSKH để được hỗ trợ.";
+			_transify_t_["label_short_for_number_1000000"] = "Triệu";
+			_transify_t_["label_new_with_defects"] = "Mới, có khiếm khuyết";
+			_transify_t_["label_get"] = "Tải Ngay";
+			_transify_t_["alert_bank_account_blacklisted"] = "Tài khoản ngân hàng đã bị cấm do có hoạt động bất thường. Vui lòng sử dung tài khoản ngân hàng khác hoặc liên hệ Bộ phận CSKH để được hỗ trợ.";
+			_transify_t_["label_k_vn"] = "k";
+			_transify_t_["label_k_ph"] = "k";
+			_transify_t_["alert_bank_account_reach_limit"] = "Bạn đã thêm tối đa số tài khoản ngân hàng được phép.";
+			_transify_t_["label_hour_abbr"] = "giờ";
+			_transify_t_["label_new_others"] = "Mới, khác";
+			_transify_t_["label_days"] = "ngày";
+			_transify_t_["label_shopee"] = "Shopee";
+			_transify_t_["label_year"] = "năm";
+			_transify_t_["label_k_id"] = "RB";
+			_transify_t_["label_weeks"] = "tuần";
+			_transify_t_["label_used_like_new"] = "Đã sử dụng";
+			_transify_t_["label_new_with_tags"] = "Mới";
+			_transify_t_["msg_server_error"] = "Lỗi Server";
+			_transify_t_["label_mil_vn"] = "tr";
+			_transify_t_["label_week_abbr"] = "tuần";
+			_transify_t_["alert_bank_account_phone_changed"] = "Tài khoản của bạn đang được xét duyệt. Vui lòng thử lại sau hoặc liên hệ {{hotline}} để được hỗ trợ.";
+			_transify_t_["label_used_with_defects"] = "Đã dùng, có khiếm khuyết";
+			_transify_t_["label_short_for_number_1000"] = "K";
+			_transify_t_["alert_edit_bank_account_error"] = "chỉ có thể sửa tài khoản ngân hàng bị từ chối";
+			_transify_t_["label_minute_abbr"] = "phút";
+			_transify_t_["label_minute"] = "phút";
+			_transify_t_["label_prep_morethan"] = "Hơn";
+			_transify_t_["label_used_acceptable"] = "Đã dùng, chấp nhận được";
+			_transify_t_["label_distance"] = "Gần bạn";
+			_transify_t_["label_within_days"] = "Trong vòng vài ngày";
+			_transify_t_["label_just_now"] = "Vừa mới đây";
+			_transify_t_["msg_account_cool_down"] = "Vì lý do bảo mật, hệ thống không thể xử lý yêu cầu của bạn. Vui lòng thử lại sau nhé.";
+			_transify_t_["label_within_minutes"] = "Trong vòng vài phút";
+			_transify_t_["label_minutes"] = "phút";
+			</script>
+			<script type="text/javascript" src="/static/jsutil_min/site.js?26da3bd8e08d"></script>
+			<script>
+				_transify_t_["label_help_center"] = "Hỗ Trợ";
+			</script>
+			<script type="text/javascript" src="/static/jsutil_min/help.js?d4db82c05745"></script>
+			<script>
+			</script>
+			<script type="text/template" id="shopee-action-sheet-item">
+				<li class='action-sheet-item {% if data.disabled %}disabled{% endif %}' data-id={{data.id}}>
+			<div class='title'>
+					{{data.title}}
+			</div>
+			<div class='subtitle L12'>
+					{% if data.subtitle %}
+							{{data.subtitle}}
+					{% endif %}
+			</div>
+		</li>
+		</script>
+		<script>
+		</script>
+		<script type="text/template" id="drop-down-menu-item">
+			<li class='drop-down-menu-item {% if data.state %}drop-down-menu-item--disabled{% endif %}' data-id={{data.id}}>
+		<div class='drop-down-menu-item__content'>
+				<div class='drop-down-menu-item__content__title r14'>
+						{{data.title}}
+				</div>
+		</div>
+	</li>
+	</script>
+	<script>
+		_transify_t_["msg_overseas_products_credit_card_only"] = "Vui lòng sử dụng thẻ Tín dụng/Ghi nợ để đặt hàng cho các sản phẩm nhập khẩu..";
+	_transify_t_["label_official_shops--TH"] = "Shopee Mall";
+	_transify_t_["label_ok"] = "ĐỒNG Ý";
+	_transify_t_["label_official_shops--ID"] = "Shopee Mall";
+	_transify_t_["msg_app_geolocation_address"] = "Vui lòng sử dụng Ứng dụng Shopee để cài đặt định vị cho địa chỉ này.";
+	_transify_t_["label_all_categories_s"] = "tất cả danh mục";
+	_transify_t_["label_online"] = "Online";
+	_transify_t_["msg_cancel_order_upgrade"] = "Để phản hồi yêu cầu hủy đơn hàng từ Người mua, bạn vui lòng cập nhật ứng dụng Shopee lên phiên bản mới nhất.";
+	_transify_t_["label_official_shops--PH"] = "Shopee Mall";
+	_transify_t_["label_your_activity_are_public"] = "Hiện tai, những người đang theo dõi bạn có thể thấy những hoạt động Thích và Bình luận của bạn";
+	_transify_t_["msg_offline_payment_disabled_singular"] = "__seller__ đã tắt chức năng Tự thỏa thuận.";
+	_transify_t_["label_unexpected_error"] = "Đã xảy ra lỗi ngoài ý muốn. Xin hãy thử lại.";
+	_transify_t_["label_official_shops--VN"] = "Shopee Mall";
+	_transify_t_["text_retrieve_location_failed"] = "Không tìm thấy địa điểm";
+	_transify_t_["msg_total_price_exceed_channel_max"] = "Bạn đã vượt quá giới hạn giao dịch. Để biết theo thông tin, vui lòng liên hệ bộ phận CSKH của chúng tôi tại 19001221";
+	_transify_t_["label_official_shops--TW"] = "Shopee Mall";
+	_transify_t_["label_ago"] = "__date__ trước";
+	_transify_t_["text_retrieve_location"] = "Đang tải...";
+	_transify_t_["label_learn_more"] = "Tìm hiểu thêm";
+	_transify_t_["label_official_shops--MY"] = "Shopee Mall";
+	_transify_t_["text_waiting_for_location"] = "Đang đợi tìm địa điểm...";
+	_transify_t_["msg_you_will_receive_a_phone_call"] = "You will receive a call from Shopee and a verification code will be read out to you.";
+	_transify_t_["msg_buyer_address_not_support_cod"] = "Địa chỉ của bạn không hỗ trợ thanh toán khi nhận hàng";
+	_transify_t_["msg_seller_has_blocked_you"] = "Người dùng này đã thêm bạn vào danh sách chặn của họ, bạn có thể sẽ muốn xem sản phẩm từ người dùng khác.";
+	_transify_t_["label_filter"] = "Lọc";
+	_transify_t_["label_see_other_products"] = "Xem sản phẩm khác";
+	_transify_t_["msg_promo_offline_no_multiple_checkouts"] = "Mã khuyến mãi chỉ có thể áp dụng cho đơn hàng của từng Người bán riêng biệt. Vui lòng chỉnh sửa Giỏ hàng của bạn.";
+	_transify_t_["label_change_setting"] = "Thay đổi cài đặt";
+	_transify_t_["msg_payment_channel_banned_category"] = "Xin lỗi, vì đơn hàng của bạn chứa sản phẩm từ __category__, __payment_channel__ đã được tắt.";
+	_transify_t_["label_age_control_ok_customize"] = "XÁC NHẬN";
+	_transify_t_["label_age_control_msgs_customize"] = "Vui lòng xác nhận bạn đã đủ __{age}__ tuổi để tiếp tục xem nội dung này.";
+	_transify_t_["label_search_in"] = "Tìm trong";
+	_transify_t_["label_chat"] = "Chat";
+	_transify_t_["label_call_me"] = "Gọi cho tôi";
+	_transify_t_["label_active_date_ago"] = "Online __date__ trước";
+	_transify_t_["label_m"] = "m";
+	_transify_t_["label_edit_product"] = "Sửa sản phẩm";
+	_transify_t_["label_cart"] = "Giỏ hàng";
+	_transify_t_["msg_total_price_below_min_amount"] = "Để sử dụng phương thức thanh toán này, đơn hàng tối thiểu phải là __min_amount__. Bạn vui lòng chọn phương thức thanh toán khác hoặc mua sắm thêm!";
+	_transify_t_["msg_cod_not_all_supported_logistic"] = "Hình thức Thanh toán khi nhận hàng không được hỗ trợ cho sản phẩm này.";
+	_transify_t_["msg_cod_temporarily_suspended"] = "Phương thức \u0022Thanh toán khi nhận hàng\u0022 tạm thời không khả dụng. Vui lòng chọn phương thức khác.";
+	_transify_t_["msg_pls_update_apps"] = "Please update your app to use this feature.";
+	_transify_t_["label_like"] = "Thích";
+	_transify_t_["label_cancel"] = "Không";
+	_transify_t_["label_official_shops--SG"] = "Shopee Mall";
+	_transify_t_["msg_download_shopee_google"] = "Please download Shopee from Google Play Store to use this feature.";
+	_transify_t_["label_follow"] = "Theo dõi";
+	_transify_t_["msg_server_error"] = "Lỗi Server";
+	_transify_t_["label_search_within_category"] = "Tìm \u0022#{searchText}\u0022 trong #{categoryName}";
+	_transify_t_["msg_payment_option_maintenance"] = "Hệ thống __channelname__ đang tạm thời được bảo trì, vui lòng chọn một phương thức thanh toán khác.";
+	_transify_t_["label_age_control_no_customize"] = "Chưa __{age}__ tuổi";
+	_transify_t_["msg_order_total_exceed_cod_maximum"] = "Đơn hàng của bạn đã vượt quá hạn mức thanh toán bằng tiền mặt (__cod_limit__ VNĐ). Xin vui lòng tách đơn hàng để giảm tổng giá trị mỗi đơn dưới hạn mức cho phép hoặc chọn cách thức thanh toán khác.";
+	_transify_t_["label_km"] = "km";
+	_transify_t_["alert_follow_limit"] = "Bạn đã vượt quá số lượt theo dõi";
+	_transify_t_["label_following"] = "Theo dõi";
+	_transify_t_["alert_follow_too_frequent"] = "Bạn đã theo dõi quá số lượt quy định của ngày. Vui lòng thử lại vào ngày mai.";
+	_transify_t_["label_within"] = "trong vòng";
+	_transify_t_["label_share"] = "Chia sẻ";
+	_transify_t_["msg_total_price_exceed_credit_card_max"] = "Thanh toán không thành công C07: Tiếc quá!  Bạn đã sử dụng tối đa hạn mức thanh toán của thẻ tín dụng/ghi nợ này. Vui lòng chọn hình thức thanh toán khác.";
+	_transify_t_["label_more_than_200km_away"] = "xa hơn 200km";
+	_transify_t_["msg_promo_code_no_offline_payment"] = "Mã khuyến mãi này không được áp dụng với phương thức thanh toán tự thỏa thuận.";
+	</script>
+	<script type="text/javascript" src="/static/jsutil_min/jsutil_base.js?43a23275332b"></script>
+	<script type="text/javascript" src="/static/jslib/jquery.mobile.custom.min.js?ef4d69c9fa8a"></script>
+	<script type="text/javascript" src="/static/pagejs_min/config.js?d5c0b1924e6e"></script>
+	<script type="text/javascript" src="/static/pagejs_min/server_constant.js?37aee91816df"></script>
+	<script type="text/javascript" src="/static/jsutil_min/BJBridgeReceiver.js?378b9f249509"></script>
+	<script>
+		_transify_t_["msg_facebook_please_copy_link"] = "Vui lòng lưu lại URL sau và dán vào Safari để mở. Chúng tôi xin lỗi vì sự bất tiện này.";
+	_transify_t_["label_search_within"] = "Tìm kiếm trong";
+	</script>
+	<script type="text/javascript" src="/static/pagejs_min/common/deep_linking.js?e91a205fe73a"></script>
+	<script type="text/javascript" src="/static/jslib/velocity.min.js?8fb122e8a4ed"></script>
+	<script type="text/javascript" src="/static/jsutil_min/multi_target_event_dispatcher.js?2204149b9212"></script>
+	<script type="text/javascript" src="/static/pagejs_min/common/app_header_controller.js?aad2cd95d8c8"></script>
+	<script type="text/javascript">
+		$(function() {
+			AppHeaderController.init($('.header'));
+		});
+		
+		
+		
+		window.criteo_q.push({ event: "setSiteType", type: isPC() ? "d" : "m" });
+		
+	</script>
+	<link rel="alternate"
+		href="android-app://com.shopee.vn/shopeevn/home?navRoute=eyJwYXRocyI6W3sid2ViTmF2Ijp7InVybCI6Imh0dHBzOi8vc2hvcGVlLnZuLzVzLzYvNnBsdXMvNnMvNnNwbHVzLzcvN3BsdXMvOC84cGx1cy94L3hyL3hzLzExLzEyL3Byby9tYXgvcGx1cy9wcm9tYXg/X2dzcmM9aHR0cHMlM0EvL3Nob3BlZS52bi81cy82LzZwbHVzLzZzLzZzcGx1cy83LzdwbHVzLzgvOHBsdXMveC94ci94cy8xMS8xMi9wcm8vbWF4L3BsdXMvcHJvbWF4In19XX0%3D" />
+		<link rel="alternate"
+			href="ios-app://959841449/shopeevn/home?navRoute=eyJwYXRocyI6W3sid2ViTmF2Ijp7InVybCI6Imh0dHBzOi8vc2hvcGVlLnZuLzVzLzYvNnBsdXMvNnMvNnNwbHVzLzcvN3BsdXMvOC84cGx1cy94L3hyL3hzLzExLzEyL3Byby9tYXgvcGx1cy9wcm9tYXg/X2dzcmM9aHR0cHMlM0EvL3Nob3BlZS52bi81cy82LzZwbHVzLzZzLzZzcGx1cy83LzdwbHVzLzgvOHBsdXMveC94ci94cy8xMS8xMi9wcm8vbWF4L3BsdXMvcHJvbWF4In19XX0%3D" />
+			<meta property="al:ios:url"
+			content="shopeevn://home?navRoute=eyJwYXRocyI6W3sid2ViTmF2Ijp7InVybCI6Imh0dHBzOi8vc2hvcGVlLnZuLzVzLzYvNnBsdXMvNnMvNnNwbHVzLzcvN3BsdXMvOC84cGx1cy94L3hyL3hzLzExLzEyL3Byby9tYXgvcGx1cy9wcm9tYXg/X2dzcmM9aHR0cHMlM0EvL3Nob3BlZS52bi81cy82LzZwbHVzLzZzLzZzcGx1cy83LzdwbHVzLzgvOHBsdXMveC94ci94cy8xMS8xMi9wcm8vbWF4L3BsdXMvcHJvbWF4In19XX0%3D" />
+			<meta property="al:ios:app_store_id" content="959841449" />
+			<meta property="al:android:url"
+			content="shopeevn://home?navRoute=eyJwYXRocyI6W3sid2ViTmF2Ijp7InVybCI6Imh0dHBzOi8vc2hvcGVlLnZuLzVzLzYvNnBsdXMvNnMvNnNwbHVzLzcvN3BsdXMvOC84cGx1cy94L3hyL3hzLzExLzEyL3Byby9tYXgvcGx1cy9wcm9tYXg/X2dzcmM9aHR0cHMlM0EvL3Nob3BlZS52bi81cy82LzZwbHVzLzZzLzZzcGx1cy83LzdwbHVzLzgvOHBsdXMveC94ci94cy8xMS8xMi9wcm8vbWF4L3BsdXMvcHJvbWF4In19XX0%3D" />
+			<meta property="al:android:package" content="com.shopee.vn" />
+		</head>
+		<body>
+			<!-- Google Tag Manager (noscript) -->
+			<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJZQSJF" height="0" width="0"
+			style="display:none;visibility:hidden"></iframe></noscript>
+			<!-- End Google Tag Manager (noscript) -->
+			<div class="header ">
+				<div class='inner middle-centered-div'>
+					<div class='icon_left ic_icon  ic_arrow_back clickable_area'>
+					</div>
+					<div class="search-bar flex1 hidden">
+						<div class="search-bar-input-wrapper middle-centered-div flex1">
+							<div class="ic_search ic_icon"></div>
+							<form class='search_form flex1' action='.'>
+								<input class="search-input flex1 L12" type='search'>
+							</form>
+							<div class='dropdown-holder'>
+								<div class='dropdown-content one r12'>
+								</div>
+								<div class='dropdown-content two r12'>
+								</div>
+							</div>
+						</div>
+						<div class="search-bar-space-holder flex1 hidden page_name L16">
+						</div>
+						<div class="ic_search_red ic_icon hidden clickable_area"></div>
+					</div>
+					<div class="no-search-bar-holder center-nav flex1">
+						<div class="search-bar-space-holder flex1 page_name L16 truncate">
+						</div>
+					</div>
+					<div class='second-panel'>
+						<a href='/buyer/login/signup/'>
+							<div class='signup-btn'>Đăng ký</div>
+						</a>
+						<a href='/buyer/login/'>
+							<div class='login-btn'>Đăng nhập</div>
+						</a>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+			</div>
+			<div class='header-holder '>
+			</div>
+			<div class='body-mask'>
+			</div>
+			<div class='lure-hold'>
+				<div class='close_btn but_no_close' onclick='hideProm()'>
+				</div>
+				<div class='dogi-logo'>
+					<div class='ic_logo_get'></div>
+				</div>
+				<div class='show-text L13'>
+				</div>
+				<div class='bottom'>
+					<div class="get_app_btns_wrapper">
+						<div class="full">
+							<a id='get_app_link' target='_blank' href='' class='btn'>Tải Ngay</a>
+						</div>
+						<div class="half"><a id='get_ios_app_link' target='_blank' href='' class='btn'
+							onclick="_track_download_ios();">
+							<div class="ic_IPhone icon"></div>
+							<div>iPhone</div>
+						</a>
+					</div>
+					<div class="half"><a id='get_android_app_link' target='_blank' href='' class='btn'
+						onclick="_track_download_android();">
+						<div class="ic_Android icon"></div>
+						<div>Android</div>
+					</a></div>
+				</div>
+			</div>
+		</div>
+		<div class="shopee-confirm-modal hidden">
+		</div>
+		<div class="shopee-confirm hidden">
+			<div class="confirm-title">
+				<div class="content"></div>
+			</div>
+			<div class="confirm-message">
+				<div class="content"></div>
+			</div>
+			<div class="confirm-button-holder middle-centered-div">
+				<div class="confirm-button cancel" data-button-id="1"></div>
+				<div class="flex1" data-button-id="0"></div>
+				<div class="confirm-button ok" data-button-id="0"></div>
+			</div>
+		</div>
+		<div class="shopee-action-sheet-mask"></div>
+		<div class="shopee-action-sheet-container center-container isPC">
+		</div>
+		<div id='pin-popup'>
+			<div class='popup'>
+				<div class='title r16'>
+				</div>
+				<div class='message r16'>
+				</div>
+				<div class='digit-holder'>
+					<div class='digit-input'>
+					</div>
+					<div class='digit-input'>
+					</div>
+				</div>
+				<div class='btn-holder'>
+					<div class='cancelText' data-button-id=1>
+					</div>
+					<div class='okText' data-button-id=0>
+					</div>
+				</div>
+			</div>
+			<div class='digit-keyboard'>
+				<div class='digit-row'>
+					<div class='digit r14'>1</div>
+					<div class='digit r14'>2</div>
+					<div class='digit r14'>3</div>
+				</div>
+				<div class='digit-row'>
+					<div class='digit r14'>4</div>
+					<div class='digit r14'>5</div>
+					<div class='digit r14'>6</div>
+				</div>
+				<div class='digit-row'>
+					<div class='digit r14'>7</div>
+					<div class='digit r14'>8</div>
+					<div class='digit r14'>9</div>
+				</div>
+				<div class='digit-row'>
+					<div class='digit r14'></div>
+					<div class='digit r14'>0</div>
+					<div class='delete r14'>Xóa</div>
+				</div>
+			</div>
+		</div>
+		<div class="container has-toolbar has-navbar">
+			<div class="error-content">
+				<img src="https://deo.shopeemobile.com/shopee/shopee-mall-live/images/ic_no_404@2x.png">
+				<h1>404</h1>
+				<p>It looks like something is missing!</p>
+			</div>
+		</div>
+		<div class='web-popup-mask'></div>
+		<div class='web-popup-holder center-container'>
+			<div class='title'></div>
+			<div class='image'></div>
+			<div class='text'></div>
+			<div class='button'></div>
+		</div>
+		<div class='web-popup-box-mask'></div>
+		<div class='web-popup-box-holder center-container'>
+			<div class='title'></div>
+			<div class='image'></div>
+			<div class='text'></div>
+			<div class='cancel'></div>
+			<div class='confirm'></div>
+		</div>
+		<div id="_alert_bg" class="hidden">
+			<div id="_alert_content" class="center-container">
+				<div class='img hidden'></div>
+				<span></span>
+				<div class="middle-centered-div alert-btn-group">
+					<div class="btn-dismiss-alert flex1">Không</div>
+					<div class="btn-confirm-alert flex1">Đồng ý</div>
+				</div>
+			</div>
+		</div>
+		<div id="_alert_msg" class="center-container hidden">
+			<div class='img hidden'></div>
+			<span></span>
+			<div class="middle-centered-div alert-btn-group">
+				<div class="btn-dismiss-alert flex1">Không</div>
+				<div class="btn-confirm-alert flex1">Đồng ý</div>
+			</div>
+		</div>
+		<div class='page_hide'></div>
+		<div class='general-mask'></div>
+		<script>
+			{
+		var dur = (Date.now ? Date.now() : +new Date()) - QOS_PAGE_START_MS;
+		if(window._track_qos_pageload)
+			_track_qos_pageload(dur);
+		if(window.BI_ANALYTICS)
+			BI_ANALYTICS.qos(QOS_TYPE.HTML, dur);
+		}
+		if(window.__plvNeedSaveAllNodesState__)
+		{
+		// __plv_saved_body__ = document.children[0].innerHTML;
+		window.__plv_saved_body__ = document.body.innerHTML;
+		}
+		</script>
+	</body>
+</html>

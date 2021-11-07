@@ -1,0 +1,534 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"sync"
+	"time"
+
+	//"os"
+	// "io"
+	"log"
+	"net/http"
+
+	"github.com/PuerkitoBio/goquery"
+
+	//"reflect"
+	"strings"
+
+	"github.com/gocolly/colly/v2"
+	//"encoding/json"
+	//"strconv"
+)
+
+func GetDataVascara() {
+
+	//* create product detail json
+	// GetProductReview()
+	// dataNew := GetProductDetail()
+
+	// BestSaleHandle(dataNew)
+
+	//* update
+	dataNew := GetProductDetail()
+	dataUpdate := UpdateProduct(dataNew)
+
+	BestSaleHandle(dataUpdate)
+
+}
+
+var jsonDetailName = "productDetails_ver_1"
+
+func removeDuplicate(data []ProductDetail) []ProductDetail {
+	for i := 0; i < len(data)-1; i++ {
+		for j := i + 1; j < len(data); j++ {
+			if data[i].ID == data[j].ID {
+				data[j].ID = -1
+			}
+		}
+	}
+	newData := []ProductDetail{}
+	for _, v := range data {
+		if v.ID != -1 {
+			newData = append(newData, v)
+		}
+	}
+	return newData
+}
+
+//* check and update product
+func UpdateProduct(productNew []ProductDetail) []ProductDetail {
+	data := readJSONDe(jsonDetailName)
+	isNotContain := true
+	for _, v := range productNew {
+		isNotContain = true
+		for i := 0; i < len(data); i++ {
+			if data[i].ID == v.ID {
+				isNotContain = false
+				break
+			}
+		}
+		if isNotContain {
+			data = append(data, v)
+		}
+	}
+	return data
+
+}
+
+//* bestsale handle
+func BestSaleHandle(data []ProductDetail) {
+	// data := readJSONDe("productDetails_ver" + strconv.Itoa(verDetail))
+	// data := readJSONDe("productDetails_ver_perfect_3")
+
+	fmt.Println("Before remove duplicate: ", len(data))
+	data = removeDuplicate(data)
+	titleGroup := []string{}
+	collector := colly.NewCollector()
+	collector.OnHTML(".list-product .product-item", func(element *colly.HTMLElement) {
+		title := element.ChildText(".product-title a")
+		titleGroup = append(titleGroup, title)
+
+	})
+	collector.OnRequest(func(request *colly.Request) {
+		fmt.Println("Visiting ", request.URL.String())
+	})
+
+	collector.Visit("https://www.vascara.com/best-sale?src=bestsale-homepage")
+
+	for i, v := range data {
+		for _, x := range titleGroup {
+			if strings.Contains(v.Title, x) {
+				data[i].BestSale = true
+				break
+			}
+		}
+	}
+	fmt.Println(len(data))
+	// writeJSONDetail(data, "productDetails_ver"+strconv.Itoa(verDetail))
+	writeJSONDetail(data, jsonDetailName)
+
+}
+
+//* get product detail
+func GetProductDetail() []ProductDetail {
+	timeBegin := time.Now().Unix()
+	var wg = sync.WaitGroup{}
+	productViews := readJSONRe("productPreviewChild")
+	data := []ProductDetail{}
+
+	ring := len(productViews)/1024 + 95
+
+	soDu := len(productViews) % ring
+	kq := len(productViews) / ring
+	k := 0
+	num := 0
+	for i := 0; i < ring; i++ {
+		for j := 0; j < kq; j++ {
+			wg.Add(1)
+
+			go func(k int) {
+				defer wg.Done()
+				data = append(data, productDetailVascava(productViews[k].Detaillink))
+				fmt.Println(k)
+			}(k)
+			k++
+
+		}
+		wg.Wait()
+
+	}
+
+	for i := 0; i < soDu; i++ {
+		wg.Add(1)
+		go func(k int) {
+			defer wg.Done()
+			data = append(data, productDetailVascava(productViews[k].Detaillink))
+			fmt.Println(k)
+
+		}(k)
+		k++
+
+	}
+	wg.Wait()
+	period := time.Now().Unix() - timeBegin
+	fmt.Println("Period finish: ", period)
+	fmt.Println("k number: ", k)
+	fmt.Println("productViews: ", len(productViews))
+	fmt.Println("number: ", num)
+	fmt.Println("product Details : ", len(data))
+
+	// writeJSONDetail(data, "productDetails_ver"+strconv.Itoa(verDetail))
+	return data
+}
+
+type ProductDetail struct {
+	ID           int    `json:"id"`
+	ProductCode  string `json:"productcode"`
+	Title        string `json:"title"`
+	CategoryName string `json:"categoryname"`
+	CategoryId   int    `json:"categoryid"`
+	Image        string `json:"image"`
+	Discount     string `json:"discount"`
+	Price        int64  `json:"price"`
+	Currency     string `json:"currency"`
+	BestSale     bool   `json:"bestsale"`
+	Infor        string `json:"infor"`
+}
+
+func productDetailVascava(url string) ProductDetail {
+
+	collector := colly.NewCollector()
+	productDetailChild := ProductDetail{}
+	collector.OnHTML(".detail-product .container", func(element *colly.HTMLElement) {
+		productDetailChild = ProductDetail{
+			ProductCode: element.ChildAttr("#productCode", "value"),
+			Title:       element.ChildText(".title-product"),
+			Image:       element.ChildAttr(".item img", "src"),
+			Discount:    element.ChildText(".percent-discount"),
+			Currency:    element.ChildTexts(".price .currency")[0],
+		}
+		idStr := element.ChildAttr("#productId", "value")
+		idInt, err := strconv.Atoi(idStr)
+		if err != nil {
+			fmt.Println(err)
+		}
+		productDetailChild.ID = idInt
+		price := element.ChildTexts(".price .amount")[0]
+		price = strings.Replace(price, ".", "", -1)
+		priceInt, err := strconv.ParseInt(price, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		productDetailChild.Price = priceInt
+		inforso := element.ChildTexts(".list-oppr span")
+		inforStr := ""
+		for i, v := range inforso {
+			if i%2 != 0 {
+				inforStr += v + "||"
+			} else {
+				inforStr += v + "|"
+			}
+		}
+		inforStr = strings.Replace(inforStr, "\u0026", "và ", -1)
+		productDetailChild.Infor = inforStr
+	})
+	collector.OnHTML(".breadcrumb", func(element *colly.HTMLElement) {
+		content := element.ChildTexts("a")
+		productDetailChild.CategoryName = content[len(content)-1]
+		productDetailChild.CategoryName = strings.Replace(productDetailChild.CategoryName, "\u0026", "và", -1)
+
+		categoryChild := readJSON("categoryChild")
+		for _, v := range categoryChild {
+			if strings.Contains(v.Name, productDetailChild.CategoryName) {
+				productDetailChild.CategoryId = v.Id
+			}
+		}
+	})
+
+	collector.OnRequest(func(request *colly.Request) {
+		fmt.Println("Visiting ", request.URL.String())
+	})
+
+	collector.Visit(url)
+	return productDetailChild
+
+	// writeJSON(allFacts)
+
+	// enc := json.NewEncoder(os.Stdout)
+	// // fmt.Println(enc)
+	// enc.SetIndent("", "_")
+	// enc.Encode(productDetailChild)
+}
+
+//* get number Product
+func GetNumberProduct(url string) int {
+	collector := colly.NewCollector()
+	numberPr := 0
+	collector.OnHTML(".page-content .cate-view-more", func(element *colly.HTMLElement) {
+		numberStr := element.ChildText(".viewmore-totalitem")
+		numberStr = strings.Trim(numberStr, " ")
+		number, err := strconv.Atoi(numberStr)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		numberPr = number
+	})
+
+	collector.OnRequest(func(request *colly.Request) {
+		fmt.Println("Visiting ", request.URL.String())
+	})
+
+	collector.Visit(url)
+	return numberPr
+
+}
+
+//* get productView
+func GetProductReview() {
+	var wg = sync.WaitGroup{}
+	data := []ProductView{}
+	categories := readJSON("categoryChild")
+	for _, v := range categories {
+		numPro := GetNumberProduct(v.LinkCategory) + 21
+		x := numPro % 21
+		y := numPro / 21
+		if x > 0 {
+			y = y + 1
+		}
+		url := v.Link
+
+		for i := 1; i <= y; i++ {
+			wg.Add(1)
+
+			if i > 1 {
+				url = strings.Replace(url, "page="+strconv.Itoa(i-1), "page="+strconv.Itoa(i), 1)
+			}
+			go func(url string) {
+				defer wg.Done()
+				data = append(data, productVascava(url)...)
+				fmt.Println("url: ", url)
+			}(url)
+
+		}
+
+		wg.Wait()
+
+		fmt.Println("_______________________________")
+		fmt.Printf("page: %v", y)
+		fmt.Println()
+		fmt.Println(len(data))
+		fmt.Println("_______________________________")
+
+	}
+
+	writeJSON(data, "productPreviewChild")
+}
+
+type ProductView struct {
+	Image      string `json:"image"`
+	Price      string `json:"price"`
+	Currency   string `json:"currency"`
+	Title      string `json:"title"`
+	Detaillink string `json:"detaillink"`
+}
+
+func productVascava(url string) []ProductView {
+	productView := make([]ProductView, 0)
+	getDataAPI := getDataAPI(url)
+
+	// Load the HTML document
+	doc, err := goquery.NewDocumentFromReader(getDataAPI)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Find the review items
+	doc.Find(".product-item").Each(func(i int, s *goquery.Selection) {
+		image, ok := s.Find(".avatar img").First().Attr("src")
+		detaillink, ok := s.Find(".product-title a").First().Attr("href")
+		if !ok {
+			fmt.Println("failed find data attr")
+		}
+		title := s.Find(".product-title a").First().Text()
+
+		title = strings.Trim(title, "\n")
+		title = strings.Trim(title, " ")
+
+		productVieChild := ProductView{
+			Image:      image,
+			Price:      s.Find(".amount").First().Text(),
+			Currency:   s.Find(".currency").First().Text(),
+			Title:      title,
+			Detaillink: detaillink,
+		}
+		productView = append(productView, productVieChild)
+	})
+	// writeJSON(allFacts)
+	return productView
+
+	// enc := json.NewEncoder(os.Stdout)
+	// // fmt.Println(enc)
+	// enc.SetIndent("", "_")
+	// enc.Encode(productView)
+	// fmt.Println(len(productView))
+}
+
+//* get data from api type html
+type source struct {
+	Html string `json:"html"`
+}
+
+func getDataAPI(url string) *strings.Reader {
+	dataSource := GetDataAPI(url)
+	data := source{}
+	jsonErr := json.Unmarshal(dataSource, &data)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+	newReader := strings.NewReader(data.Html)
+	return newReader
+}
+
+type Category struct {
+	Id           int    `json:"id"`
+	IdFa         int    `json:"idfa"`
+	Name         string `json:"title"`
+	Link         string `json:"link"`
+	LinkCategory string `json:"linkcategory"`
+}
+
+// func categoryVascava(){
+// 	category := make([]Category, 0)
+// 	res, err := http.Get("https://www.vascara.com")
+//   if err != nil {
+//     log.Fatal(err)
+//   }
+//   defer res.Body.Close()
+//   if res.StatusCode != 200 {
+//     log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+//   }
+//   // Load the HTML document
+//   doc, err := goquery.NewDocumentFromReader(res.Body)
+//   if err != nil {
+//     log.Fatal(err)
+//   }
+
+//   // Find the review items
+//   doc.Find(".main-menu ul li").Each(func(i int, s *goquery.Selection) {
+//   		link, ok := s.Find("a").Attr("href")
+//   		if !ok {
+// 				fmt.Println("failed find data attr")
+// 			}
+// 			catgoryChild := Category{
+// 				Name:   s.Find("a").First().Text(),
+// 				Link: link,
+// 			}
+// 			category = append(category, catgoryChild)
+// 	})
+// 	// writeJSON(category, "category")
+
+// 	enc := json.NewEncoder(os.Stdout)
+// 	// fmt.Println(enc)
+// 	enc.SetIndent("", "_")
+// 	enc.Encode(category)
+// 	fmt.Println(len(category))
+// }
+
+//learn
+
+type Fact struct {
+	ID          int    `json:"id"`
+	Description string `json:"description"`
+}
+
+func rhirofacts() {
+	allFacts := make([]Fact, 0)
+
+	collector := colly.NewCollector(
+		colly.AllowedDomains("factretriever.com", "www.factretriever.com"),
+	)
+	collector.OnHTML(".factsList li", func(element *colly.HTMLElement) {
+		factID, err := strconv.Atoi(element.Attr("id"))
+		if err != nil {
+			log.Println("Could not get id")
+		}
+
+		factDesc := element.Text
+
+		fact := Fact{
+			ID:          factID,
+			Description: factDesc,
+		}
+		allFacts = append(allFacts, fact)
+
+	})
+
+	collector.OnRequest(func(request *colly.Request) {
+		fmt.Println("Visiting ", request.URL.String())
+	})
+
+	collector.Visit("https://www.factretriever.com/rhino-facts")
+
+	// writeJSON(allFacts)
+
+	enc := json.NewEncoder(os.Stdout)
+	fmt.Println(enc)
+}
+
+// dataFinded := re.FindString(dataSource)
+
+func GetDataAPI(url string) []byte {
+	res, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	// dataToStr := string(body[:])
+
+	//var result map[string]interface{}
+	return body
+
+}
+
+// func DataPatternAPI(pattern string, url string) {
+// 	dataSource := GetDataAPI(url)
+// 	dataSource = strings.Replace(dataSource, "\n", "", -1)
+// 	re := regexp.MustCompile(pattern)
+// 	dataFinded := re.FindAllString(dataSource, -1)
+// 	// fmt.Println(dataSource)
+// 	for _, v := range dataFinded {
+// 		fmt.Println("")
+// 		fmt.Println("_____________")
+// 		fmt.Println("______________")
+// 		fmt.Println("_______________")
+// 		fmt.Println("______________")
+// 		fmt.Println("_______________")
+// 		fmt.Println("_______________")
+
+// 		fmt.Println(v)
+// 	}
+
+// }
+
+// func productVascava() {
+// 	productView := make([]ProductView, 0)
+
+// 	collector := colly.NewCollector()
+// 	collector.OnHTML(".product-item", func(element *colly.HTMLElement) {
+
+// 		productVieChild := ProductView{
+// 			Image:      element.ChildAttr(".avatar img", "src"),
+// 			Price:      element.ChildText(".amount"),
+// 			Currency:   element.ChildText(".currency"),
+// 			Title:      element.ChildText(".product-title a"),
+// 			Detaillink: element.ChildAttr(".product-title a", "href"),
+// 		}
+// 		productView = append(productView, productVieChild)
+// 	})
+
+// 	collector.OnRequest(func(request *colly.Request) {
+// 		fmt.Println("Visiting ", request.URL.String())
+// 	})
+
+// 	collector.Visit("https://www.vascara.com/giay")
+
+// 	// writeJSON(allFacts)
+
+// 	enc := json.NewEncoder(os.Stdout)
+// 	// fmt.Println(enc)
+// 	enc.SetIndent("", "_")
+// 	enc.Encode(productView)
+// 	fmt.Println(len(productView))
+// }

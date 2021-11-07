@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  dbPostgres:
+    image: postgres:latest
+    restart: always
+    ports:
+        - 5432:5432
+    environment:
+        POSTGRES_USER: root
+        POSTGRES_PASSWORD: 2520
+        POSTGRES_DB: crawl_golang
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - rabbitmq_go_net
+  elasticsearch:
+    container_name: es-container
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    environment:
+        - "discovery.type=single-node"
+    ports:
+        - "9200:9200"
+        - "9300:9300"
+    volumes:
+        - ./esdata/:/usr/share/elasticsearch/data/
+    networks:
+        - rabbitmq_go_net
+  kibana:
+    container_name: kib-container
+    image: docker.elastic.co/kibana/kibana:7.15.1
+    ports:
+         - "5601:5601"
+    environment:
+        - ELASTICSEARCH_URL=http://es-container:9200
+    networks:
+        - rabbitmq_go_net
+networks:
+  rabbitmq_go_net:
+      driver: bridge
+
+  # crawl-data:
+  #   image: "crawl"
+  #   container_name: crawl-data
+  #   hostname: crawl-data
+  #   restart: always
+  #   environment:
+  #     - PORT=8080
+  #   ports:
+  #     - 8080:8080

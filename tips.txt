@@ -1,0 +1,6 @@
+pkg + tab
+
+go connect string mongo compass:
+	mongodb+srv://admin:<password>@cluster0.k00qa.mongodb.net/test
+mongo connect application:
+	mongodb+srv://admin:<password>@cluster0.k00qa.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
