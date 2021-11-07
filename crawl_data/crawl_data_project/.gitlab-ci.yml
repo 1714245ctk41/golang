@@ -1,0 +1,44 @@
+image: "kroniak/ssh-client"
+
+stages:
+  - test
+  - deploy
+
+go_test:
+  image: golang:1.16
+  stage: test
+  except:
+    - tags
+  script:
+    - 'echo "WARN: should implement test"'
+
+.deploy:
+  stage: deploy
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh -tt hieu@$HOST "export PATH=$PATH:/usr/local/go/bin && cd $GO_PATH && git pull && make compose_prod"
+
+deploy:soft_push:
+  extends: .deploy
+  variables:
+    HOST: ${STG_HOST}
+    SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_STG}
+    GO_PATH: src/staging/noor-match
+    DOCKER_COMMAND: docker-compose restart
+  only:
+    - master
+
+deploy:pull_rebuild:
+  extends: .deploy
+  when: manual
+  variables:
+    HOST: ${STG_HOST}
+    SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_STG}
+    GO_PATH: src/staging/noor-match
+    DOCKER_COMMAND: docker-compose up --force-recreate -d
+  only:
+    - master

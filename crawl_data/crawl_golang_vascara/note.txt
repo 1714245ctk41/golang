@@ -1,0 +1,60 @@
+price : int, float,...
+idFa category
+perfect_1 : 3079
+perfect_2 : 3080
+perfect_3 : 3076 _> 3085
+perfect_4 : 3078
+perfect_5 : 3079
+perfect_6 : 3081
+
+
+
+
+max goroutine : 1024
+chuyền dữ liệu thay đổi liên tục vào go func(k int), đừng sử dụng for trong go func waitGroup
+
+//* get product detail
+func GetProductDetail() {
+	timeBegin := time.Now().Unix()
+	var wg = sync.WaitGroup{}
+	data := []ProductDetail{}
+	productViews := readJSONRe("productPreviewChild")
+	// ring := len(productViews) / (len(productViews)/1024 + 1)
+	ring := 3000
+
+	soDu := len(productViews) % ring
+	kq := len(productViews) / ring
+	k := 0
+
+	for i := 0; i < ring; i++ {
+		wg.Add(1)
+
+		go func() {
+			for j := 0; j < kq; j++ {
+				data = append(data, productDetailVascava(productViews[k].Detaillink))
+			}
+			wg.Done()
+		}()
+		k++
+
+	}
+	wg.Wait()
+
+	for i := 0; i < soDu; i++ {
+		wg.Add(1)
+		go func() {
+			data = append(data, productDetailVascava(productViews[k].Detaillink))
+			k++
+			wg.Done()
+
+		}()
+	}
+	wg.Wait()
+	period := time.Now().Unix() - timeBegin
+	fmt.Println("Period finish: ", period)
+	fmt.Println("k number: ", k)
+	fmt.Println("productViews: ", len(productViews))
+
+	fmt.Println(len(data))
+	writeJSONDetail(data, "productDetails_ver1")
+}

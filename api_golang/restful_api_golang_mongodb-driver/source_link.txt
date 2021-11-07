@@ -1,0 +1,4 @@
+https://www.youtube.com/watch?v=oW7PMHEYiSk
+go get github.com/gorilla/mux
+go get go.mongodb.org/mongo-driver/mongo
+

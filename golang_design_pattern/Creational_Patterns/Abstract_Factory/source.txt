@@ -1,0 +1,2 @@
+article: https://refactoring.guru/design-patterns/abstract-factory/go/example#example-0
+code: https://refactoring.guru/design-patterns/abstract-factory/go/example#example-0
